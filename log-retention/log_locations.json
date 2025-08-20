@@ -1,0 +1,12 @@
+[
+  {
+    "directory": "/home/user/logs/example",
+    "keep": 2,
+    "regex": "*.json"
+  },
+  {
+    "directory": "/var/backups/example",
+    "keep": 3,
+    "regex": "*.tar"
+  }
+]
