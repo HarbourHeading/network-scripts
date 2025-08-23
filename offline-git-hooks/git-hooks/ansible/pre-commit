@@ -1,0 +1,59 @@
+#!/bin/sh
+
+# https://stackoverflow.com/a/28938235
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+OFF='\033[0m' # No Color
+
+echo "--- Running checks ---"
+
+if git diff --cached --name-only --diff-filter=ACM | grep -q '^roles/'; then
+  # If any roles/* files are staged, include all playbooks
+  pb_files=$(find playbooks/ -type f -name "*.yaml")
+else
+  # Otherwise, only staged playbook yml/yaml- Strip playbooks/ from var as path is obvious
+  pb_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^playbooks/.*\.ya?ml$' | sed 's|^playbooks/||')
+fi
+
+# Get staged shell scripts
+sh_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.sh')
+
+if [ -n "$pb_files" ]; then
+
+    if type ansible-lint > /dev/null; then
+        # Not targeting playbooks dir as it lints roles too
+        if ! ansible-lint --offline; then
+            printf "%Ansible-lint %sfailed checks." "$RED" "$OFF"
+            exit 1
+        fi
+    else
+        printf "%sWARNING: %sMissing ansible-lint linting tool. Install in env with 'pip3 install ansible-lint'" "$YELLOW" "$OFF"
+    fi
+
+    if type ansible-playbook-grapher > /dev/null; then
+        if ! ansible-playbook-grapher --include-role-tasks playbooks/"$pb_files" -o graphs/"$pb_files"; then
+            printf "%Ansible-playbook-grapher %sfailed to run. Is there a syntax error?" "$RED" "$OFF"
+            exit 1
+        fi
+
+        git add graphs/
+    else
+        printf "%sWARNING: %sMissing ansible-playbook-grapher graph tool. Install in env with 'pip3 install ansible-playbook-grapher (and 'graphviz' dependency)'" "$YELLOW" "$OFF"
+    fi
+
+fi
+
+if [ -n "$sh_files" ]; then
+    if type pylint > /dev/null; then
+        shellcheck "$sh_files"
+        if [ ! $? ]; then
+            printf "%sShellcheck %sfailed checks." "$RED" "$OFF"
+            exit 1
+        fi
+    else
+        printf "%sWARNING: %sMissing shellcheck linting tool. Install in env with 'sudo dnf install ShellCheck'" "$YELLOW" "$OFF"
+    fi
+fi
+
+printf "%sAll checks passed." "$OFF"
+exit 0

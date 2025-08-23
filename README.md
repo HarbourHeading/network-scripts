@@ -10,6 +10,15 @@ This tool can show the current backups, delete a specific backup by id or delete
 
 Does not autorun itself. A cronjob or equivalent to run the script on interval is recommended.
 
+## Offline Git Hooks
+
+Solution to share git hooks with a team, as `.git/hooks/` is not a version controlled file. Made with offline development environments in mind.<br>
+Currently supports [python](offline-git-hooks/git-hooks/python/pre-commit) and [ansible](offline-git-hooks/git-hooks/ansible/pre-commit) pre-hook linting and checking processes.
+
+Does not utilize the [pre-commit](https://github.com/pre-commit/pre-commit) framework as that project is mostly dependent on online connectivity, as it fetches from remote repos.<br>
+We couldn't use it as we required an offline development solution. For reference, [pre-commit does support local routes](https://stackoverflow.com/a/67796237), but seemed like a little more work<br>
+than just writing my own pre-commit script.
+
 ## Log Retention
 
 [Log Retention](log-retention) is a shell script that reads a JSON configuration file and deletes old files in specified directories,
@@ -17,3 +26,4 @@ keeping only the most recent ones based on a filename pattern. Can set paths, re
 Allows for setting multiple unique retention setups.
 
 Does not autorun itself. A cronjob or equivalent to run the script on interval is recommended.
+
