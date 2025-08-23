@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# https://stackoverflow.com/a/28938235
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+OFF='\033[0m' # No Color
+
+echo "--- Running checks ---"
+
+# Get specific stage files
+py_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py') # python files
+sh_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.sh') # shell/bash files
+
+if [ -n "$py_files" ]; then
+
+    if type black > /dev/null; then
+        # Run black to auto-format
+        black "$py_files"
+        if [ ! $? ]; then
+            printf "%sBlack failed to format files.%s Verify files have valid syntax." "$RED" "$OFF"
+            exit 1
+        fi
+
+        # Re-add potentially reformatted files
+        git add "$py_files"
+    else
+        printf "%sWARNING: %sMissing black formatting tool. Install in env with 'pip3 install black'" "$YELLOW" "$OFF"
+    fi
+
+    if type pylint > /dev/null; then
+        # Run pylint to lint
+        pylint "$py_files"
+        if [ ! $? ]; then
+            printf "%sPylint found issues. %sPlease fix issues before committing." "$RED" "$OFF"
+            exit 1
+        fi
+    else
+        printf "%sWARNING: %sMissing pylint linting tool. Install in env with 'pip3 install pylint'" "$YELLOW" "$OFF"
+    fi
+
+    if type pytype > /dev/null; then
+        # Run pytype on staged Python files
+        pytype "$py_files"
+        if [ ! $? ]; then
+            printf "%sPytype failed. %sFix errors before committing." "$RED" "$OFF"
+            exit 1
+        fi
+    else
+        printf "%sWARNING: %sMissing pytype static type analyzer. Install in env with 'pip3 install pytype'" "$YELLOW" "$OFF"
+    fi
+fi
+
+if [ -n "$sh_files" ]; then
+
+    if type shellcheck > /dev/null; then
+        shellcheck "$sh_files"
+        if [ ! $? ]; then
+            printf "%sShellcheck %sfailed checks." "$RED" "$OFF"
+            exit 1
+        fi
+    else
+        printf "%sWARNING: %sMissing shellcheck linting tool. Install in env with 'sudo dnf install ShellCheck'" "$YELLOW" "$OFF"
+    fi
+fi
+
+printf "%sAll checks passed." "$OFF"
+exit 0
