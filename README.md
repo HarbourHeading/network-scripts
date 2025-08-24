@@ -12,12 +12,12 @@ Does not autorun itself. A cronjob or equivalent to run the script on interval i
 
 ## Offline Git Hooks
 
-Solution to share git hooks with a team, as `.git/hooks/` is not a version controlled file. Made with offline development environments in mind.<br>
-Currently supports [python](offline-git-hooks/git-hooks/python/pre-commit) and [ansible](offline-git-hooks/git-hooks/ansible/pre-commit) pre-hook linting and checking processes.
+Solution to share git hooks with a team, as `.git/hooks/` is not a version controlled file. Made with offline development environments in mind.
+Supports [python](offline-git-hooks/git-hooks/python/pre-commit) and [ansible](offline-git-hooks/git-hooks/ansible/pre-commit) pre-hook linting and checking processes.
 
-Does not utilize the [pre-commit](https://github.com/pre-commit/pre-commit) framework as that project is mostly dependent on online connectivity, as it fetches from remote repos.<br>
-We couldn't use it as we required an offline development solution. For reference, [pre-commit does support local routes](https://stackoverflow.com/a/67796237), but seemed like a little more work<br>
-than just writing my own pre-commit script.
+Does not utilize the [pre-commit](https://github.com/pre-commit/pre-commit) framework as that project is mostly dependent on online connectivity, as it fetches from remote repos.
+We couldn't use it as we required an offline development solution. For reference, [pre-commit does support local routes](https://stackoverflow.com/a/67796237), 
+but seemed like a little more work than just writing my own pre-commit script.
 
 ## Log Retention
 
